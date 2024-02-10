@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] CharacterController characterController;
-    [SerializeField] RopeController ropeController;
+    [SerializeField] Transform ropeAttachPoint;
 
     private Vector3 moveDirection = Vector3.zero;
     private Vector3 swingDirection;
@@ -51,14 +51,14 @@ public class PlayerController : MonoBehaviour
         {
             HangFromEdge();
         }
-        /*else if (isSwinging)
+        else if (isSwinging)
         {
             characterController.Move(swingDirection * Time.deltaTime);
 
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
             characterController.Move(climbDirection);
-        }*/
+        }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
         {
             Jump();
@@ -152,10 +152,14 @@ public class PlayerController : MonoBehaviour
         moveDirection.y = jumpHeight;
         isHanging = false;
     }
-    /*void StartSwinging(Transform ropeTransform)
+    void StartSwinging(Transform ropeTransform)
     {
         Vector3 ropeDirection = ropeTransform.position - ropeAttachPoint.position;
         swingDirection = Vector3.Cross(ropeDirection, Vector3.up).normalized * swingForce;
+        if (Input.GetButtonDown("Jump"))
+        {
+            isHanging = false;
+        }
     }
     void HangOnRope(Transform ropeTransform)
     {
@@ -170,12 +174,9 @@ public class PlayerController : MonoBehaviour
         characterController.Move(climbDirection);
 
         // Check if the player wants to release the rope
-        if (Input.GetButtonDown("Jump"))
-        {
-            isHanging = false;
-        }
+        
         StartSwinging(ropeTransform);
-    }*/
+    }
     void Jump()
     {
         moveDirection.y = jumpHeight;
@@ -191,10 +192,10 @@ public class PlayerController : MonoBehaviour
         {
             isHanging = true;
         }
-        /*else if (hit.gameObject.CompareTag("rope"))
+        else if (hit.gameObject.CompareTag("rope"))
         {
             HangOnRope(hit.transform);
-        }*/
+        }
     }
     
 
