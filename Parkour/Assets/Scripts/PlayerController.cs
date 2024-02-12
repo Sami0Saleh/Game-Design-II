@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask edgeLayer;
     public LayerMask ropeLayer;
 
-    private bool isSprinting = false;
+    public bool isSprinting = false;
     public bool isWallRunning = false;
     public bool isHanging = false;
     public bool isSwinging = false;
@@ -51,14 +51,14 @@ public class PlayerController : MonoBehaviour
         {
             HangFromEdge();
         }
-        else if (isSwinging)
+        /*else if (isSwinging)
         {
             characterController.Move(swingDirection * Time.deltaTime);
 
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
             characterController.Move(climbDirection);
-        }
+        }*/
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
         {
             Jump();
@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
                 moveDirection = wallRunDirection * wallRunSpeed;
 
                 // Apply gravity to stick to the wall
-                moveDirection.y -= 60f * Time.deltaTime;
+                moveDirection.y -= 5f * Time.deltaTime;
                 characterController.Move(moveDirection * Time.deltaTime);
             }
             else
