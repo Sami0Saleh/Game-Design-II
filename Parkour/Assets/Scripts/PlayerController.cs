@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -51,14 +52,16 @@ public class PlayerController : MonoBehaviour
         {
             HangFromEdge();
         }
-        /*else if (isSwinging)
+        else if (isSwinging)
         {
-            characterController.Move(swingDirection * Time.deltaTime);
-
+            characterController.Move(Vector3.zero); // reset move
+           // characterController.Move(swingDirection * Time.deltaTime);
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
+            climbDirection.x = 0;
+            climbDirection.z = 0;
             characterController.Move(climbDirection);
-        }*/
+        }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
         {
             Jump();
@@ -168,21 +171,24 @@ public class PlayerController : MonoBehaviour
             isHanging = false;
         }
     }
-    void HangOnRope(Transform ropeTransform)
+    void HangOnRope(Transform ropeTransform) // Where is it being called from?
     {
+        Debug.Log("hanging on!");
         isSwinging = true;
+        ropeAttachPoint = ropeTransform.transform; // Assign the transform when hitting the rope
+
         // Position the player slightly below the rope attach point
         hangPosition = ropeTransform.position + ropeAttachPoint.localPosition;
+        hangPosition.y = transform.position.y; // sets the player on the height he connected to the rope
         characterController.Move(hangPosition - transform.position);
 
         // Check for climbing input
-        float verticalInput = Input.GetAxis("Vertical");
+       /* float verticalInput = Input.GetAxis("Vertical");
         Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
-        characterController.Move(climbDirection);
-
+        characterController.Move(climbDirection);*/
         // Check if the player wants to release the rope
         
-        StartSwinging(ropeTransform);
+      //  StartSwinging(ropeTransform);
     }
     void Jump()
     {
