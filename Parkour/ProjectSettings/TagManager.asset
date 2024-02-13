@@ -7,6 +7,7 @@ TagManager:
   - sidewall
   - edge
   - rope
+  - Checkpoint
   layers:
   - Default
   - TransparentFX
