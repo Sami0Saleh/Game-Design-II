@@ -28,7 +28,7 @@ public class RopeController : MonoBehaviour
             if (Input.GetButtonDown("Jump"))
             {
                 isSwinging = true;
-                playerController.isSwinging = true;
+                playerController.isOnRope = true;
             }
         }
     }
@@ -45,7 +45,7 @@ public class RopeController : MonoBehaviour
     void StartSwinging(Transform ropeTransform)
     {
         isSwinging = true;
-        playerController.isSwinging = true;
+        playerController.isOnRope = true;
 
         // Calculate the direction from the attach point to the player
         Vector3 ropeDirection = ropeTransform.position - ropeAttachPoint.position;

@@ -6,12 +6,16 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] CharacterController characterController;
-    [SerializeField] Transform ropeAttachPoint;
+    private Transform ropeAttachPoint;
+    private bool _isRopeLocated = false;
+    private Collider _ropeCollider;
 
     private Vector3 moveDirection = Vector3.zero;
     private Vector3 swingDirection;
     private Vector3 hangPosition;
-
+    private float horizontalInput;
+    private float verticalInput;
+    private float moveSpeed;
 
     public float swingForce = 10f;
     public float climbSpeed = 5f;
@@ -32,15 +36,15 @@ public class PlayerController : MonoBehaviour
     public bool isSprinting = false;
     public bool isWallRunning = false;
     public bool isHanging = false;
-    public bool isSwinging = false;
+    public bool isOnRope = false;
 
     void Update()
     {
-        float moveSpeed = isSprinting ? sprintSpeed : walkSpeed;
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        moveSpeed = isSprinting ? sprintSpeed : walkSpeed;
+        horizontalInput = Input.GetAxis("Horizontal");
+        verticalInput = Input.GetAxis("Vertical");
 
-        if (!characterController.isGrounded && !isWallRunning && !isHanging && !isSwinging)
+        if (!characterController.isGrounded && !isWallRunning && !isHanging && !isOnRope)
         {
             moveDirection.y -= gravity * Time.deltaTime;
         }
@@ -52,15 +56,25 @@ public class PlayerController : MonoBehaviour
         {
             HangFromEdge();
         }
-        else if (isSwinging)
+        else if (isOnRope)
         {
             characterController.Move(Vector3.zero); // reset move
-           // characterController.Move(swingDirection * Time.deltaTime);
+                                                    // characterController.Move(swingDirection * Time.deltaTime);
+            moveDirection = Vector3.zero;                                        
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
             climbDirection.x = 0;
             climbDirection.z = 0;
             characterController.Move(climbDirection);
+            if (Input.GetButtonDown("Jump"))
+            {
+                _ropeCollider.enabled = false;
+                horizontalInput = Input.GetAxis("Horizontal");
+                moveDirection = transform.forward * horizontalInput * moveSpeed * Time.deltaTime;
+                characterController.Move(moveDirection);
+                isOnRope = false;
+                
+            }
         }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
         {
@@ -71,7 +85,6 @@ public class PlayerController : MonoBehaviour
             moveDirection = new Vector3(horizontalInput, 0.0f, verticalInput);
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
-            
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -122,36 +135,36 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Detected a edge");
         // Perform raycast to detect edges below the character
         RaycastHit hit;
-        if (/*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*/ true)
+        Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
+        Debug.Log("Entered RayCast");
+        // Position character at the edge with slight offset
+        Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
+        characterController.Move(/*hangPosition*/ currentPos - transform.position);
+
+        // Disable movement along y-axis
+        moveDirection.y = 0;
+
+        // Check for lateral movement input
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+        Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
+        characterController.Move(lateralMovement * Time.deltaTime);
+
+        // Check for jump input to vault from edge
+        if (Input.GetButtonDown("Jump"))
         {
-            Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
-            Debug.Log("Entered RayCast");
-            // Position character at the edge with slight offset
-            Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
-            characterController.Move(/*hangPosition*/ currentPos - transform.position);
-
-            // Disable movement along y-axis
-            moveDirection.y = 0;
-
-            // Check for lateral movement input
-            float horizontalInput = Input.GetAxis("Horizontal");
-            float verticalInput = Input.GetAxis("Vertical");
-            Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
-            characterController.Move(lateralMovement * Time.deltaTime);
-
-            // Check for jump input to vault from edge
-            if (Input.GetButtonDown("Jump"))
-            {
                
-                Debug.Log("let Go from Edge");
-                JumpFromEdge();
-            }
+            Debug.Log("let Go from Edge");
+            JumpFromEdge();
+        }
+        /*if (*//*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*//* true)
+        {
         }
         else
         {
             // Stop hanging if no edge is detected
             isHanging = false;
-        }
+        }*/
     }
 
     void JumpFromEdge()
@@ -162,37 +175,43 @@ public class PlayerController : MonoBehaviour
         moveDirection.z = 10;
         isHanging = false;
     }
-    void StartSwinging(Transform ropeTransform)
+    /*void StartSwinging(Transform ropeTransform)
     {
         Vector3 ropeDirection = ropeTransform.position - ropeAttachPoint.position;
         swingDirection = Vector3.Cross(ropeDirection, Vector3.up).normalized * swingForce;
         if (Input.GetButtonDown("Jump"))
         {
             isHanging = false;
+            _isRopeLocated = false;
         }
-    }
+    }*/
     void HangOnRope(Transform ropeTransform) // Where is it being called from?
     {
         Debug.Log("hanging on!");
-        isSwinging = true;
-        ropeAttachPoint = ropeTransform.transform; // Assign the transform when hitting the rope
+        isOnRope = true;
+        if (!_isRopeLocated)
+        {
+            ropeAttachPoint = ropeTransform.transform; // Assign the transform when hitting the rope
 
-        // Position the player slightly below the rope attach point
-        hangPosition = ropeTransform.position + ropeAttachPoint.localPosition;
-        hangPosition.y = transform.position.y; // sets the player on the height he connected to the rope
-        characterController.Move(hangPosition - transform.position);
-
-        // Check for climbing input
-       /* float verticalInput = Input.GetAxis("Vertical");
-        Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
-        characterController.Move(climbDirection);*/
-        // Check if the player wants to release the rope
+            // Position the player slightly below the rope attach point
+            hangPosition = ropeTransform.position + ropeAttachPoint.localPosition;
+            hangPosition.y = transform.position.y; // sets the player on the height he connected to the rope
+            characterController.Move(hangPosition - transform.position);
+            _isRopeLocated = true;
+        }
         
-      //  StartSwinging(ropeTransform);
+        // Check for climbing input
+        /* float verticalInput = Input.GetAxis("Vertical");
+         Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
+         characterController.Move(climbDirection);*/
+        // Check if the player wants to release the rope
+
+        //  StartSwinging(ropeTransform);
     }
     void Jump()
     {
         moveDirection.y = jumpHeight;
+        
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -208,6 +227,7 @@ public class PlayerController : MonoBehaviour
         else if (hit.gameObject.CompareTag("rope"))
         {
             HangOnRope(hit.transform);
+            _ropeCollider = hit.collider;
         }
     }
     

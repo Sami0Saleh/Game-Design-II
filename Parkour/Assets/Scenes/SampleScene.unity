@@ -1170,6 +1170,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.020000013, y: 0.00000017910727, z: 0.02003281}
   m_Center: {x: -4.0984635e-17, y: -0.000000042760178, z: -0.000016404316}
+--- !u!4 &9540100 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9130425258532343937, guid: 0ddb60ebd19596b45b9700c4592ce074, type: 3}
+  m_PrefabInstance: {fileID: 9540097}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &16909909
 GameObject:
   m_ObjectHideFlags: 0
@@ -83323,7 +83328,7 @@ PrefabInstance:
     - target: {fileID: 6769785995591716887, guid: 759ec7f2bec68bf429b7bc009dd16f73, type: 3}
       propertyPath: ropeAttachPoint
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 9540100}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
