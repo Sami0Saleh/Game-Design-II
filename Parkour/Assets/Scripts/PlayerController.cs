@@ -115,13 +115,17 @@ public class PlayerController : MonoBehaviour
 
     void HangFromEdge()
     {
+        Vector3 currentPos = transform.position;
+        Debug.Log("Detected a edge");
         // Perform raycast to detect edges below the character
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer))
+        if (/*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*/ true)
         {
+            Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
+            Debug.Log("Entered RayCast");
             // Position character at the edge with slight offset
             Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
-            characterController.Move(hangPosition - transform.position);
+            characterController.Move(/*hangPosition*/ currentPos - transform.position);
 
             // Disable movement along y-axis
             moveDirection.y = 0;
@@ -135,6 +139,8 @@ public class PlayerController : MonoBehaviour
             // Check for jump input to vault from edge
             if (Input.GetButtonDown("Jump"))
             {
+               
+                Debug.Log("let Go from Edge");
                 JumpFromEdge();
             }
         }
@@ -150,6 +156,7 @@ public class PlayerController : MonoBehaviour
         // Apply jump force away from the edge
         moveDirection = transform.up * jumpHeight;
         moveDirection.y = jumpHeight;
+        moveDirection.z = 10;
         isHanging = false;
     }
     void StartSwinging(Transform ropeTransform)
