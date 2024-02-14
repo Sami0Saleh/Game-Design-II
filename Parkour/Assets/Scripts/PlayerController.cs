@@ -80,6 +80,13 @@ public class PlayerController : MonoBehaviour
                 _isJumpingFromRope = true;
                 moveDirection = oldMoveDirection * 3;
 
+                StartCoroutine(RopeColiderReset());
+
+
+
+            }
+            else
+            {
             }
         }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
@@ -238,4 +245,12 @@ public class PlayerController : MonoBehaviour
             _ropeCollider = hit.collider;
         }
     }
+
+    IEnumerator RopeColiderReset()
+    {
+        yield return new WaitForSecondsRealtime(1);
+        _ropeCollider.enabled = true;
+
+    }
+
 }
