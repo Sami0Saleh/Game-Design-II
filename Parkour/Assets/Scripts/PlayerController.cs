@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
     public bool isHanging = false;
     public bool isOnRope = false;
 
-   
+
     void Update()
     {
         moveSpeed = isSprinting ? sprintSpeed : walkSpeed;
@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour
         {
             characterController.Move(Vector3.zero); // reset move
                                                     // characterController.Move(swingDirection * Time.deltaTime);
-            moveDirection = Vector3.zero;                                        
+            moveDirection = Vector3.zero;
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
             climbDirection.x = 0;
@@ -73,13 +73,20 @@ public class PlayerController : MonoBehaviour
             {
                 _ropeCollider.enabled = false;
                 horizontalInput = Input.GetAxis("Horizontal");
-               
+
                 moveDirection = transform.forward * horizontalInput * moveSpeed * Time.deltaTime;
                 characterController.Move(moveDirection);
                 isOnRope = false;
                 _isJumpingFromRope = true;
                 moveDirection = oldMoveDirection * 3;
 
+                StartCoroutine(RopeColiderReset());
+
+
+
+            }
+            else
+            {
             }
         }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
@@ -102,7 +109,7 @@ public class PlayerController : MonoBehaviour
         {
             isSprinting = false;
         }
-       
+
         characterController.Move(moveDirection * Time.deltaTime);
 
     }
@@ -142,45 +149,45 @@ public class PlayerController : MonoBehaviour
         Vector3 currentPos = transform.position;
         Debug.Log("Detected a edge");
         // Perform raycast to detect edges below the character
-        RaycastHit hit;
-        Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
-        Debug.Log("Entered RayCast");
-        // Position character at the edge with slight offset
-        Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
-        characterController.Move(/*hangPosition*/ currentPos - transform.position);
-
-        // Disable movement along y-axis
-        moveDirection.y = 0;
-
-        // Check for lateral movement input
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-        Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
-        characterController.Move(lateralMovement * Time.deltaTime);
-
-        // Check for jump input to vault from edge
-        if (Input.GetButtonDown("Jump"))
+        if (/*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*/ true)
         {
-               
-            Debug.Log("let Go from Edge");
-            JumpFromEdge();
-        }
-        /*if (*//*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*//* true)
-        {
+            RaycastHit hit;
+            Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
+            Debug.Log("Entered RayCast");
+            // Position character at the edge with slight offset
+            Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
+            characterController.Move(/*hangPosition*/ currentPos - transform.position);
+
+            // Disable movement along y-axis
+            moveDirection.y = 0;
+
+            // Check for lateral movement input
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
+            characterController.Move(lateralMovement * Time.deltaTime);
         }
         else
         {
             // Stop hanging if no edge is detected
             isHanging = false;
-        }*/
+        }
+
+        // Check for jump input to vault from edge
+        if (Input.GetButtonDown("Jump"))
+        {
+
+            Debug.Log("let Go from Edge");
+            JumpFromEdge();
+        }
     }
 
     void JumpFromEdge()
     {
         // Apply jump force away from the edge
-        moveDirection = transform.up * jumpHeight;
+        moveDirection = transform.forward * jumpHeight;
         moveDirection.y = jumpHeight;
-        moveDirection.z = 10;
+        moveDirection.z = transform.forward.z;
         isHanging = false;
     }
     /*void StartSwinging(Transform ropeTransform)
@@ -207,7 +214,7 @@ public class PlayerController : MonoBehaviour
             characterController.Move(hangPosition - transform.position);
             _isRopeLocated = true;
         }
-        
+
         // Check for climbing input
         /* float verticalInput = Input.GetAxis("Vertical");
          Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
@@ -219,7 +226,7 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         moveDirection.y = jumpHeight;
-        
+
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -238,4 +245,12 @@ public class PlayerController : MonoBehaviour
             _ropeCollider = hit.collider;
         }
     }
+
+    IEnumerator RopeColiderReset()
+    {
+        yield return new WaitForSecondsRealtime(1);
+        _ropeCollider.enabled = true;
+
+    }
+
 }

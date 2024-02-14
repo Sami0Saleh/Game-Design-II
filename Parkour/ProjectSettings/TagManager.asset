@@ -7,6 +7,8 @@ TagManager:
   - sidewall
   - edge
   - rope
+  - Checkpoint
+  - DeathGround
   layers:
   - Default
   - TransparentFX
