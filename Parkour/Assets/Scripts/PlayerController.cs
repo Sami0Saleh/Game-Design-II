@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
     private float moveSpeed;
+    private bool _isJumpingFromRope;
+    private Vector3 oldMoveDirection;
 
     public float swingForce = 10f;
     public float climbSpeed = 5f;
@@ -37,6 +39,7 @@ public class PlayerController : MonoBehaviour
     public bool isWallRunning = false;
     public bool isHanging = false;
     public bool isOnRope = false;
+
 
     void Update()
     {
@@ -60,7 +63,7 @@ public class PlayerController : MonoBehaviour
         {
             characterController.Move(Vector3.zero); // reset move
                                                     // characterController.Move(swingDirection * Time.deltaTime);
-            moveDirection = Vector3.zero;                                        
+            moveDirection = Vector3.zero;
             verticalInput = Input.GetAxis("Vertical");
             Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
             climbDirection.x = 0;
@@ -70,10 +73,13 @@ public class PlayerController : MonoBehaviour
             {
                 _ropeCollider.enabled = false;
                 horizontalInput = Input.GetAxis("Horizontal");
+
                 moveDirection = transform.forward * horizontalInput * moveSpeed * Time.deltaTime;
                 characterController.Move(moveDirection);
                 isOnRope = false;
-                
+                _isJumpingFromRope = true;
+                moveDirection = oldMoveDirection * 3;
+
             }
         }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
@@ -85,6 +91,7 @@ public class PlayerController : MonoBehaviour
             moveDirection = new Vector3(horizontalInput, 0.0f, verticalInput);
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
+            oldMoveDirection = moveDirection;
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -95,6 +102,7 @@ public class PlayerController : MonoBehaviour
         {
             isSprinting = false;
         }
+
         characterController.Move(moveDirection * Time.deltaTime);
 
     }
@@ -153,7 +161,7 @@ public class PlayerController : MonoBehaviour
         // Check for jump input to vault from edge
         if (Input.GetButtonDown("Jump"))
         {
-               
+
             Debug.Log("let Go from Edge");
             JumpFromEdge();
         }
@@ -199,7 +207,7 @@ public class PlayerController : MonoBehaviour
             characterController.Move(hangPosition - transform.position);
             _isRopeLocated = true;
         }
-        
+
         // Check for climbing input
         /* float verticalInput = Input.GetAxis("Vertical");
          Vector3 climbDirection = transform.up * verticalInput * climbSpeed * Time.deltaTime;
@@ -211,7 +219,7 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         moveDirection.y = jumpHeight;
-        
+
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -230,6 +238,4 @@ public class PlayerController : MonoBehaviour
             _ropeCollider = hit.collider;
         }
     }
-    
-
 }

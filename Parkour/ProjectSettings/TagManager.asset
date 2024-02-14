@@ -8,6 +8,7 @@ TagManager:
   - edge
   - rope
   - Checkpoint
+  - DeathGround
   layers:
   - Default
   - TransparentFX
