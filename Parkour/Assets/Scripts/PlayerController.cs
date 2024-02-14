@@ -142,21 +142,29 @@ public class PlayerController : MonoBehaviour
         Vector3 currentPos = transform.position;
         Debug.Log("Detected a edge");
         // Perform raycast to detect edges below the character
-        RaycastHit hit;
-        Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
-        Debug.Log("Entered RayCast");
-        // Position character at the edge with slight offset
-        Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
-        characterController.Move(/*hangPosition*/ currentPos - transform.position);
+        if (/*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*/ true)
+        {
+            RaycastHit hit;
+            Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer);
+            Debug.Log("Entered RayCast");
+            // Position character at the edge with slight offset
+            Vector3 hangPosition = hit.point + transform.up * edgeHangOffset;
+            characterController.Move(/*hangPosition*/ currentPos - transform.position);
 
-        // Disable movement along y-axis
-        moveDirection.y = 0;
+            // Disable movement along y-axis
+            moveDirection.y = 0;
 
-        // Check for lateral movement input
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-        Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
-        characterController.Move(lateralMovement * Time.deltaTime);
+            // Check for lateral movement input
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            Vector3 lateralMovement = new Vector3(horizontalInput, 0, verticalInput).normalized * hangMovementSpeed;
+            characterController.Move(lateralMovement * Time.deltaTime);
+        }
+        else
+        {
+            // Stop hanging if no edge is detected
+            isHanging = false;
+        }
 
         // Check for jump input to vault from edge
         if (Input.GetButtonDown("Jump"))
@@ -165,22 +173,14 @@ public class PlayerController : MonoBehaviour
             Debug.Log("let Go from Edge");
             JumpFromEdge();
         }
-        /*if (*//*Physics.Raycast(transform.position, -transform.up, out hit, edgeDetectionDistance, edgeLayer)*//* true)
-        {
-        }
-        else
-        {
-            // Stop hanging if no edge is detected
-            isHanging = false;
-        }*/
     }
 
     void JumpFromEdge()
     {
         // Apply jump force away from the edge
-        moveDirection = transform.up * jumpHeight;
+        moveDirection = transform.forward * jumpHeight;
         moveDirection.y = jumpHeight;
-        moveDirection.z = 10;
+        moveDirection.z = transform.forward.z;
         isHanging = false;
     }
     /*void StartSwinging(Transform ropeTransform)
