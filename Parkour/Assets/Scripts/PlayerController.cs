@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
     private float moveSpeed;
+    private bool _isJumpingFromRope;
+    private Vector3 oldMoveDirection;
 
     public float swingForce = 10f;
     public float climbSpeed = 5f;
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour
     public bool isHanging = false;
     public bool isOnRope = false;
 
+   
     void Update()
     {
         moveSpeed = isSprinting ? sprintSpeed : walkSpeed;
@@ -70,10 +73,13 @@ public class PlayerController : MonoBehaviour
             {
                 _ropeCollider.enabled = false;
                 horizontalInput = Input.GetAxis("Horizontal");
+               
                 moveDirection = transform.forward * horizontalInput * moveSpeed * Time.deltaTime;
                 characterController.Move(moveDirection);
                 isOnRope = false;
-                
+                _isJumpingFromRope = true;
+                moveDirection = oldMoveDirection * 3;
+
             }
         }
         else if (characterController.isGrounded && Input.GetButtonDown("Jump"))
@@ -85,6 +91,7 @@ public class PlayerController : MonoBehaviour
             moveDirection = new Vector3(horizontalInput, 0.0f, verticalInput);
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
+            oldMoveDirection = moveDirection;
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -95,6 +102,7 @@ public class PlayerController : MonoBehaviour
         {
             isSprinting = false;
         }
+       
         characterController.Move(moveDirection * Time.deltaTime);
 
     }
@@ -230,6 +238,4 @@ public class PlayerController : MonoBehaviour
             _ropeCollider = hit.collider;
         }
     }
-    
-
 }
